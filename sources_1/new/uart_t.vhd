@@ -49,27 +49,101 @@ end uart_t;
 
 architecture Behavioral of uart_t is
 
+--uart_t state machine
 type t_state is (RDY, LOAD_BIT, SEND_BIT);
-
-constant bit_timer_max : std_logic_vector(to_unsigned(floor(real(100000000)/real(9600)), log2(floor(real(100000000)/real(9600)))));
-
+--timer to have Nbaud
+constant bit_timer_max : std_logic_vector(to_unsigned(floor(real(100000000)/real(Nbaud)), log2(floor(real(100000000)/real(Nbaud)))));
+--max bit index data+start+stop
 constant max_bit_index : positive := N + 2;
 
-
+--timer reg for Nbaud
 signal rBitTimer : std_logic_vector(log2(floor(real(100000000)/real(9600)))-1 downto 0);
-
+--logic indicating BitTimer reached bit_timer_max
 signal rBitDone : std_logic;
-
+--index of bit
 signal rBitIndex : positive;
-
+--bit to be trasmitted (standard 1 for no transmisssion)
 signal rBit_t : std_logic := '1';
-
+--vector with data+start+stop
 signal rData_t :std_logic_vector(N+1 downto 0);
-
+--state machine initialization
 signal rState_t : t_state := RDY;
 
 
 begin
+
+--Next state logic
+next_t_state_process : process(clk)
+begin
+    if(rising_edge(clk)) then
+        case rState_t is
+            when RDY =>
+                if(send = '1') then
+                    rState_t <= LOAD_BIT;
+                end if;
+            when LOAD_BIT =>
+                rState_t <= SEND_BIT;
+            when SEND_BIT =>
+                if(rBitDone = '1') then
+                    if(rBitIndex = max_bit_index) then
+                        rState_t <= RDY;
+                    else
+                        rState_t <= LOAD_BIT;
+                    end if;
+                end if;
+            when others =>
+                rState_t <= RDY;    --never
+        end case;
+    end if;
+end process;
+
+
+--bit timing for Nbaud
+bit_timing_process : process(clk)
+begin
+    if(rising_edge(clk)) then
+        if(rState_t = RDY) then
+            rBitTimer <= (others => '0');
+        else
+            if(rBitDone = '1') then
+                rBitTimer <= (others => '0');
+            else
+                rBitTimer <= rBitTimer + 1;
+            end if;
+        end if;
+    end if;
+end process;
+
+--async logic of max timer
+rBitDone <= '1' when (rBitTimer = bit_timer_max) else '0';
+
+
+--sequential indexing for transmission
+bit_index_process : process(clk)
+begin
+    if (rising_edge(clk)) then
+		if (SEND = '1') then
+			rData_t <= '1' & data & '0';    --latch transmission (start+data+stop)
+		end if;
+	end if;
+end process;
+
+
+--transmission
+t_bit_process : process(clk)
+begin
+    if (rising_edge(lk)) then
+		if (txState = RDY) then
+			rBit_t <= '1';  --default no transmission
+		elsif (txState = LOAD_BIT) then
+			rBit_t <= rData_t(rBitIndex); --sequential out of 
+		end if;
+	end if;
+end process;
+
+--async out connection
+uart_t_out <= rBit_t;
+ready <= '1' when (rState_t = RDY) else '0';
 
 
 end Behavioral;
