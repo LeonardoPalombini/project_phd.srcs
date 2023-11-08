@@ -32,12 +32,24 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity top is
---  Port ( );
+    Port (
+        sysClk : in std_logic;
+        sysRst : in std_logic;
+        sysIn : in std_logic_vector(3 downto 0);
+        sysSend: in std_logic;
+        uart_ready : out std_logic;
+        sysOut : out std_logic
+    );
 end top;
 
 architecture Behavioral of top is
 
+
+
+
 begin
 
+
+    
 
 end Behavioral;
