@@ -71,6 +71,8 @@ signal rBitTimer : std_logic_vector(width-1 downto 0) := (others => '0');
 signal rBitTimer_half : std_logic_vector(width_half-1 downto 0) := (others => '0');
 --signal to sample bit
 signal rSampleBit : std_logic;
+--signal to start reading
+signal rStartCount : std_logic;
 --index of bit
 signal rBitIndex : positive;
 --vector with data+start+stop
@@ -84,7 +86,26 @@ begin
 --next state logic
 next_r_state_process : process(clk)
 begin
-    
+    if(rising_edge(clk)) then
+        case rState_r is
+            when RDY =>
+                if(rStartCount = '1') then
+                    rState_r <= WAIT_BIT;
+                end if;
+            when WAIT_BIT =>
+                if(rSampleBit = '1') then
+                    rState_r <= SAMPLE_BIT;
+                end if;
+            when SAMPLE_BIT =>
+                if(rBitIndex = max_bit_index) then
+                    rState_r <= LOAD_DATA;
+                else
+                    State_r <= WAIT_BIT;
+                end if;
+            when LOAD_DATA =>
+                rState_r <= RDY;
+        end case;
+    end if;
 end process;
 
 
