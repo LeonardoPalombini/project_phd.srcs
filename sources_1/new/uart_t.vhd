@@ -44,9 +44,9 @@ entity uart_t is
         data : in std_logic_vector(N-1 downto 0);
         clk : in std_logic;
         ready : out std_logic;
-        uart_t_out : out std_logic;
-        bit_count_out : out std_logic_vector(5 downto 0);
-        state_probe : out std_logic_vector(1 downto 0)
+        uart_t_out : out std_logic
+--        bit_count_out : out std_logic_vector(5 downto 0);
+--        state_probe : out std_logic_vector(1 downto 0)
     );
 end uart_t;
 
@@ -67,7 +67,7 @@ signal rBitTimer : std_logic_vector(width-1 downto 0) := (others => '0');
 --logic indicating BitTimer reached bit_timer_max
 signal rBitDone : std_logic;
 --index of bit
-signal rBitIndex : positive;
+signal rBitIndex : integer;
 --bit to be trasmitted (standard 1 for no transmisssion)
 signal rBit_t : std_logic := '1';
 --vector with data+start+stop
@@ -77,7 +77,7 @@ signal rState_t : t_state := RDY;
 
 
 begin
-bit_count_out <= rBitTimer;
+--bit_count_out <= rBitTimer;
 
 --Next state logic
 next_t_state_process : process(clk)
@@ -85,15 +85,15 @@ begin
     if(rising_edge(clk)) then
         case rState_t is
             when RDY =>
-                state_probe <= "01";
+--                state_probe <= "01";
                 if(send = '1') then
                     rState_t <= LOAD_BIT;
                 end if;
             when LOAD_BIT =>
-                state_probe <= "10";
+--                state_probe <= "10";
                 rState_t <= SEND_BIT;
             when SEND_BIT =>
-                state_probe <= "11";
+--                state_probe <= "11";
                 if(rBitDone = '1') then
                     if(rBitIndex = max_bit_index) then
                         rState_t <= RDY;
@@ -102,7 +102,7 @@ begin
                     end if;
                 end if;
             when others =>
-                state_probe <= "00";
+--                state_probe <= "00";
                 rState_t <= RDY;    --never
         end case;
     end if;

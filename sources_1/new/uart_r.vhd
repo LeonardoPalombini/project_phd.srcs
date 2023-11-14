@@ -43,10 +43,10 @@ entity uart_r is
         clk : in std_logic;
         dataIn : in std_logic;
         dataOut : out std_logic_vector(N-1 downto 0);
-        ready : out std_logic;
-        bit_count_out : out std_logic_vector(5 downto 0);
-        half_count_out : out std_logic_vector(4 downto 0);
-        state_probe : out std_logic_vector(1 downto 0)
+        ready : out std_logic
+--        bit_count_out : out std_logic_vector(5 downto 0);
+--        half_count_out : out std_logic_vector(4 downto 0);
+--        state_probe : out std_logic_vector(1 downto 0)
     );
 end uart_r;
 
@@ -66,7 +66,7 @@ constant bit_timer_max : std_logic_vector := std_logic_vector(to_unsigned(length
 --timer to check start com
 constant bit_timer_half : std_logic_vector := std_logic_vector(to_unsigned(length_half, width_half));
 --max bit index data+start+stop
-constant max_bit_index : positive := N ;
+constant max_bit_index : integer := N ;
 
 --timer reg for Nbaud
 signal rBitTimer : std_logic_vector(width-1 downto 0) := (others => '0');
@@ -77,7 +77,7 @@ signal rSampleBit : std_logic;
 --signal to start reading
 signal rStartCount : std_logic;
 --index of bit
-signal rBitIndex : positive;
+signal rBitIndex : integer;
 --vector with data+start+stop
 signal rData_t :std_logic_vector(N downto 0);
 --vector with data only
@@ -87,8 +87,8 @@ signal rDataFin_t :std_logic_vector(N-1 downto 0);
 signal rState_r : t_state := RDY;
 
 begin
-bit_count_out <= rBitTimer;
-half_count_out <= rBitTimer_half;
+--bit_count_out <= rBitTimer;
+--half_count_out <= rBitTimer_half;
 
 --next state logic
 next_r_state_process : process(clk)
@@ -96,24 +96,24 @@ begin
     if(rising_edge(clk)) then
         case rState_r is
             when RDY =>
-                state_probe <= "00";
+--                state_probe <= "00";
                 if(rStartCount = '1') then
                     rState_r <= WAIT_BIT;
                 end if;
             when WAIT_BIT =>
-                state_probe <= "01";
+--                state_probe <= "01";
                 if(rSampleBit = '1') then
                     rState_r <= SAMPLE_BIT;
                 end if;
             when SAMPLE_BIT =>
-                state_probe <= "10";
+--                state_probe <= "10";
                 if(rBitIndex = max_bit_index) then
                     rState_r <= LOAD_DATA;
                 else
                     rState_r <= WAIT_BIT;
                 end if;
             when LOAD_DATA =>
-                state_probe <= "11";
+--                state_probe <= "11";
                 rState_r <= RDY;
         end case;
     end if;
