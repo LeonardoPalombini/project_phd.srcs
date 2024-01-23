@@ -43,9 +43,10 @@ entity uart_r is
         clk : in std_logic;
         dataIn : in std_logic;
         dataOut : out std_logic_vector(N-1 downto 0);
-        ready : out std_logic
+        ready : out std_logic;
+        spyCount : out std_logic
 --        bit_count_out : out std_logic_vector(5 downto 0);
---        half_count_out : out std_logic_vector(4 downto 0);
+--        half_count_out : out std_logic_vector(4 downto 0)
 --        state_probe : out std_logic_vector(1 downto 0)
     );
 end uart_r;
@@ -75,7 +76,7 @@ signal rBitTimer_half : std_logic_vector(width_half-1 downto 0) := (others => '0
 --signal to sample bit
 signal rSampleBit : std_logic;
 --signal to start reading
-signal rStartCount : std_logic;
+signal rStartCount : std_logic := '0';
 --index of bit
 signal rBitIndex : integer;
 --vector with data+start+stop
@@ -87,6 +88,7 @@ signal rDataFin_t :std_logic_vector(N-1 downto 0);
 signal rState_r : t_state := RDY;
 
 begin
+spyCount <= rSampleBit;
 --bit_count_out <= rBitTimer;
 --half_count_out <= rBitTimer_half;
 
